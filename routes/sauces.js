@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 
-const sauces = require("../sauces");
+const sauces = require("../data/sauces");
 
 /**
  * Get all sauces
