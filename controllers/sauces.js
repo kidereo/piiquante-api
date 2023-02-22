@@ -15,7 +15,7 @@ exports.index = (req, res) => {
 exports.show = (req, res) => {
   //Find the sauce
   const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sause not found, return 404
+  //If sauce not found, return 404
   if (!sauce) {
     return res.status(404).send("Sauce not found.");
   }
@@ -49,7 +49,7 @@ exports.store = (req, res) => {
 exports.update = (req, res) => {
   //Find the sauce
   const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sause not found, return 404
+  //If sauce not found, return 404
   if (!sauce) {
     return res.status(404).send("Sauce not found.");
   }
@@ -72,7 +72,7 @@ exports.update = (req, res) => {
 exports.destroy = (req, res) => {
   //Find the sauce
   const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sause not found, return 404
+  //If sauce not found, return 404
   if (!sauce) {
     return res.status(404).send("Sauce not found.");
   }

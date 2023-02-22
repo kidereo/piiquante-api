@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-const sauces = require("../services/datamock-sauces");
 const saucesController = require("../controllers/sauces");
 
 /**
