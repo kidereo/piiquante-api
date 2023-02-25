@@ -1,7 +1,3 @@
-const startupDebugger = require("debug")("app:startup");
-const objectDebugger = require("debug")("app:objects");
-const dbDebugger = require("debug")("app:db");
-
 require("dotenv").config();
 const config = require("config");
 const helmet = require("helmet");
@@ -9,6 +5,10 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+
+const startupDebugger = require("debug")("app:startup");
+const objectDebugger = require("debug")("app:objects");
+const dbDebugger = require("debug")("app:db");
 
 const auth = require("./middleware/auth");
 const homeRoute = require("./routes/home");
