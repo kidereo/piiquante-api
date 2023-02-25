@@ -6,28 +6,30 @@ const Sauce = require("../models/Sauce");
  * Get all sauces
  */
 exports.index = async (req, res) => {
-  const sauces = await Sauce.find()
-    .sort({ name: 1, manufacturer: 1 })
+  try {
+    const sauces = await Sauce.find().sort({ name: 1 });
     //.select({ name: 1, heat: 1, manufacturer: 1, description: 1 })
-    .catch((error) => dbDebugger("Database error:", error));
-  //.then((sauces) => res.status(200).json(sauces));
+    //.then((sauces) => res.status(200).json(sauces));
 
-  res.status(200).send(sauces);
+    res.status(200).send(sauces);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
 };
 
 /**
  * Get a sauce
  */
 exports.show = async (req, res) => {
-  const sauce = await Sauce.findById(req.params.id).catch((error) =>
-    dbDebugger("Database error:", error)
-  );
-
-  if (!sauce) {
-    return res.status(404).send("Sauce not found...");
+  try {
+    const sauce = await Sauce.findById(req.params.id);
+    if (!sauce) {
+      res.status(404).send("Sauce not found...");
+    }
+    res.status(200).send(sauce);
+  } catch (error) {
+    res.status(400).send(error.message);
   }
-
-  res.status(200).send(sauce);
 };
 
 /**
@@ -35,23 +37,15 @@ exports.show = async (req, res) => {
  */
 exports.store = async (req, res) => {
   const newSauce = new Sauce({
-    name: req.body.name,
-    manufacturer: req.body.name,
-    description: req.body.description,
-    heat: req.body.heat,
-    mainPepper: req.body.mainPepper,
-    imageUrl: "",
-    userId: "",
-    usersLiked: [],
-    usersDisliked: [],
+    ...req.body,
   });
 
-  const result = await newSauce
-    .save()
-    //.then(() => dbDebugger("Sauce added sucessfully..."))
-    .catch((error) => res.status(400).send(error.message));
-
-  res.status(200).send(result);
+  try {
+    const result = await newSauce.save();
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
 };
 
 /**
@@ -73,30 +67,36 @@ exports.update = async (req, res) => {
   // const result = await sauce.save();
   // res.status(200).send(result);
 
-  const sauce = await Sauce.findByIdAndUpdate(
-    { _id: req.params.id },
-    {
-      $set: {
-        ...req.body,
+  try {
+    const sauce = await Sauce.findByIdAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          ...req.body,
+        },
       },
-    },
-    { new: true }
-  ).catch((error) => res.status(400).send(error.message));
+      { new: true }
+    );
 
-  res.status(200).send(sauce);
+    res.status(200).send(sauce);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
 };
 
 /**
  * Delete a sauce
  */
 exports.destroy = async (req, res) => {
-  const sauce = await Sauce.findByIdAndDelete({ _id: req.params.id }).catch(
-    (error) => res.status(400).send(error.message)
-  );
+  try {
+    const sauce = await Sauce.findByIdAndDelete({ _id: req.params.id });
 
-  if (!sauce) {
-    return res.status(404).send("Sauce not found.");
+    if (!sauce) {
+      return res.status(404).send("Sauce not found.");
+    }
+
+    res.send(`Sauce "${sauce.name}" deleted.`);
+  } catch (error) {
+    res.status(400).send(error.message);
   }
-
-  res.send(`Sauce "${sauce.name}" deleted.`);
 };
