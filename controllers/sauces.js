@@ -1,92 +1,102 @@
-const Joi = require("joi");
+const dbDebugger = require("debug")("app:db");
 
-const sauces = require("../services/datamock-sauces");
+const Sauce = require("../models/Sauce");
 
 /**
  * Get all sauces
  */
-exports.index = (req, res) => {
-  res.send(sauces);
+exports.index = async (req, res) => {
+  const sauces = await Sauce.find()
+    .sort({ name: 1, manufacturer: 1 })
+    //.select({ name: 1, heat: 1, manufacturer: 1, description: 1 })
+    .catch((error) => dbDebugger("Database error:", error));
+  //.then((sauces) => res.status(200).json(sauces));
+
+  res.status(200).send(sauces);
 };
 
 /**
  * Get a sauce
  */
-exports.show = (req, res) => {
-  //Find the sauce
-  const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sauce not found, return 404
+exports.show = async (req, res) => {
+  const sauce = await Sauce.findById(req.params.id).catch((error) =>
+    dbDebugger("Database error:", error)
+  );
+
   if (!sauce) {
-    return res.status(404).send("Sauce not found.");
+    return res.status(404).send("Sauce not found...");
   }
-  //If all is well return the sauce
-  res.send(sauce);
+
+  res.status(200).send(sauce);
 };
 
 /**
  * Add a sauce
  */
-exports.store = (req, res) => {
-  //Validation request
-  const validatedResult = validateSauce(req.body);
-  //If validation fails return 400 with error
-  if (validatedResult.error) {
-    return res.status(400).send(validatedResult.error.details[0].message);
-  }
-  //If all is well add and return the sauce
-  const newSauce = {
-    id: sauces.length + 1,
-    name: validatedResult.value.name,
-    manufacturer: validatedResult.value.manufacturer,
-  };
-  sauces.push(newSauce);
-  res.send(newSauce);
+exports.store = async (req, res) => {
+  const newSauce = new Sauce({
+    name: req.body.name,
+    manufacturer: req.body.name,
+    description: req.body.description,
+    heat: req.body.heat,
+    mainPepper: req.body.mainPepper,
+    imageUrl: "",
+    userId: "",
+    usersLiked: [],
+    usersDisliked: [],
+  });
+
+  const result = await newSauce
+    .save()
+    //.then(() => dbDebugger("Sauce added sucessfully..."))
+    .catch((error) => res.status(400).send(error.message));
+
+  res.status(200).send(result);
 };
 
 /**
  * Edit a sauce
  */
-exports.update = (req, res) => {
-  //Find the sauce
-  const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sauce not found, return 404
-  if (!sauce) {
-    return res.status(404).send("Sauce not found.");
-  }
-  //Validate request
-  const validatedResult = validateSauce(req.body);
+exports.update = async (req, res) => {
+  // //Find the sauce
+  // const sauce = await Sauce.findById(req.params.id).catch((error) =>
+  //   dbDebugger("Database error:", error)
+  // );
+  // //If sauce not found, return 404
+  // if (!sauce) {
+  //   return res.status(404).send("Sauce not found...");
+  // }
+  // //If all is well - update properties and return the updated sauce
+  // sauce.set({
+  //   ...req.body,
+  // });
+  // const result = await sauce.save();
+  // res.status(200).send(result);
 
-  //If validation fails return 400 with error
-  if (validatedResult.error) {
-    return res.status(400).send(validatedResult.error.details[0].message);
-  }
-  //If all is well - update properties and return the updated sauce
-  sauce.name = req.body.name;
-  sauce.manufacturer = req.body.manufacturer;
-  res.send(sauce);
+  const sauce = await Sauce.findByIdAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: {
+        ...req.body,
+      },
+    },
+    { new: true }
+  ).catch((error) => res.status(400).send(error.message));
+
+  res.status(200).send(sauce);
 };
 
 /**
  * Delete a sauce
  */
-exports.destroy = (req, res) => {
-  //Find the sauce
-  const sauce = sauces.find((sauce) => sauce.id === parseInt(req.params.id));
-  //If sauce not found, return 404
+exports.destroy = async (req, res) => {
+  const sauce = await Sauce.findByIdAndDelete({ _id: req.params.id }).catch(
+    (error) => res.status(400).send(error.message)
+  );
+
   if (!sauce) {
     return res.status(404).send("Sauce not found.");
   }
-  //If the sauce exists - delete it
-  const sauceIndex = sauces.indexOf(sauce);
-  sauces.splice(sauceIndex, 1);
+
   res.send(`Sauce "${sauce.name}" deleted.`);
 };
-
-//Validation function
-function validateSauce(sauce) {
-  const schema = Joi.object({
-    name: Joi.string().min(3).required(),
-    manufacturer: Joi.string().required(),
-  });
-  return schema.validate(sauce);
-}

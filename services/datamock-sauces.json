@@ -1,5 +1,81 @@
-[
-    { "id": 1, "name": "Ketchup", "manufacturer": "Heinz" },
-    { "id": 2, "name": "HP Brown Sauce", "manufacturer": "HP" },
-    { "id": 3, "name": "Thousand Isles", "manufacturer": "Mendelez" }
-]
+[{
+  "_id": {
+    "$oid": "6287c174940853ed26dffadd"
+  },
+  "name": "HP Brown Sauce",
+  "manufacturer": "HP Foods",
+  "description": "HP Sauce, the original brown sauce which since 1899 has set the standard for quality.",
+  "mainPepper": "Tomatoes",
+  "imageUrl": "",
+  "heat": 4,
+  "likes": 0,
+  "dislikes": 0,
+  "userId": "",
+  "usersLiked": [],
+  "usersDisliked": [],
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6288916bfda108a80dd6f38a"
+  },
+  "name": "Blue Dragon Sweet Chilli Dipping Sauce",
+  "manufacturer": "AB World Foods",
+  "description": "Thai sweet chilli sauce.",
+  "mainPepper": "Red Chillies",
+  "imageUrl": "",
+  "heat": 6,
+  "likes": 0,
+  "dislikes": 0,
+  "userId": "",
+  "usersLiked": [],
+  "usersDisliked": [],
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63c7f1f61a64637ab3de01cf"
+  },
+  "name": "Tomato Ketchup Sauce",
+  "manufacturer": "H.J. Heinz Foods",
+  "description": "Our classic Heinz Tomato Ketchup has been a staple at mealtimes since 1886.",
+  "mainPepper": "Tomatoes",
+  "imageUrl": "",
+  "heat": 2,
+  "likes": 0,
+  "dislikes": 0,
+  "userId": "",
+  "usersLiked": [],
+  "usersDisliked": [],
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63c7f2841a64637ab3de01d3"
+  },
+  "name": "Tabasco Original Red Hot Pepper Sauce",
+  "manufacturer": "AB World Foods",
+  "description": "By Appointment to Her Majesty Queen Elizabeth II Supplier of Tabasco® Sauce McIlhenney Company USA.",
+  "mainPepper": "Chilli",
+  "imageUrl": "",
+  "heat": 8,
+  "likes": 0,
+  "dislikes": 0,
+  "userId": "",
+  "usersLiked": [],
+  "usersDisliked": [],
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63c7f2e01a64637ab3de01d8"
+  },
+  "name": "Lea & Perrins Worcestershire Sauce",
+  "manufacturer": "Lea & Perrins",
+  "description": "The original and genuine.",
+  "mainPepper": "Anchovies",
+  "imageUrl": "",
+  "heat": 5,
+  "likes": 0,
+  "dislikes": 0,
+  "userId": "",
+  "usersLiked": [],
+  "usersDisliked": [],
+  "__v": 0
+}]

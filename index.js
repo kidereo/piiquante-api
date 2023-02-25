@@ -21,7 +21,9 @@ mongoose
       process.env.DB_USER +
       ":" +
       process.env.DB_PASSWORD +
+      "@" +
       process.env.DB_PATH +
+      "/" +
       process.env.DB_NAME +
       "?retryWrites=true&w=majority"
   )
@@ -29,6 +31,14 @@ mongoose
   .catch((error) =>
     dbDebugger("Database connection failed with message:", error.message)
   );
+
+/**
+ * Start Test Ground
+ */
+
+/**
+ * End Test Ground
+ */
 
 app.use(express.json());
 app.use(express.static("public"));
