@@ -41,3 +41,10 @@ exports.store = async (req, res) => {
     res.status(400).send({ error: errorMessage });
   }
 };
+
+/**
+ * Login user
+ */
+exports.login = async (req, res) => {
+  res.status(200).send("Work in progress...");
+};

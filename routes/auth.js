@@ -13,4 +13,9 @@ router.get("/", userController.index);
  */
 router.post("/signup", userController.store);
 
+/**
+ * Login user
+ */
+router.post("/login", userController.login);
+
 module.exports = router;
