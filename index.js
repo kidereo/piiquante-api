@@ -13,6 +13,7 @@ const dbDebugger = require("debug")("app:db");
 const auth = require("./middleware/auth");
 const homeRoute = require("./routes/home");
 const sauceRoutes = require("./routes/sauces");
+const authRoutes = require("./routes/auth");
 
 mongoose.set("strictQuery", false);
 mongoose
@@ -51,6 +52,7 @@ if (app.get("env") === "development") {
 app.use(auth);
 app.use("/api", homeRoute);
 app.use("/api/sauces", sauceRoutes);
+app.use("/api/auth", authRoutes);
 
 const port = config.get("port") || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

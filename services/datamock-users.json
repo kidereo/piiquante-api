@@ -1,0 +1,37 @@
+[{
+  "_id": {
+    "$oid": "63fb04ed9c38e415a111d55c"
+  },
+  "email": "james@univex.co.uk",
+  "password": "password",
+  "dateAdded": {
+    "$date": {
+      "$numberLong": "1677395181733"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63fb05579c38e415a111d560"
+  },
+  "email": "m@univex.co.uk",
+  "password": "password",
+  "dateAdded": {
+    "$date": {
+      "$numberLong": "1677395287211"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "63fb0674fbfa4dbc4d9502b0"
+  },
+  "email": "q@univex.co.uk",
+  "password": "password",
+  "dateAdded": {
+    "$date": {
+      "$numberLong": "1677395572865"
+    }
+  },
+  "__v": 0
+}]
