@@ -4,5 +4,5 @@ const config = require("config");
  * API entrypoint
  */
 exports.index = (req, res) => {
-  res.send(config.get("app-name"));
+  return res.send(config.get("app-name"));
 };

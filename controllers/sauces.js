@@ -1,6 +1,7 @@
 const dbDebugger = require("debug")("app:db");
 
 const Sauce = require("../models/Sauce");
+const { User } = require("../models/User");
 
 /**
  * Get all sauces
@@ -11,9 +12,9 @@ exports.index = async (req, res) => {
     //.select({ name: 1, heat: 1, manufacturer: 1, description: 1 })
     //.then((sauces) => res.status(200).json(sauces));
 
-    res.status(200).send(sauces);
+    return res.status(200).send(sauces);
   } catch (error) {
-    res.status(400).send(error.message);
+    return res.status(400).send(error.message);
   }
 };
 
@@ -24,12 +25,12 @@ exports.show = async (req, res) => {
   try {
     const sauce = await Sauce.findById(req.params.id);
     if (!sauce) {
-      res.status(404).send("Sauce not found...");
+      return res.status(404).send({ error: "Sauce not found." });
     }
 
-    res.status(200).send(sauce);
+    return res.status(200).send(sauce);
   } catch (error) {
-    res.status(400).send(error.message);
+    return res.status(400).send({ error: error.message });
   }
 };
 
@@ -37,20 +38,27 @@ exports.show = async (req, res) => {
  * Add a sauce
  */
 exports.store = async (req, res) => {
-  const newSauce = new Sauce({
-    ...req.body,
-  });
-
   try {
+    const user = await User.findById(req.body.userId);
+
+    if (!user) {
+      return res
+        .status(400)
+        .send({ error: "No user suplied or no such user exists." });
+    }
+
+    const newSauce = new Sauce({
+      ...req.body,
+    });
     const result = await newSauce.save();
 
-    res.status(200).send(result);
+    return res.status(200).send(result);
   } catch (error) {
     for (field in error.errors) {
       dbDebugger(error.errors[field].message);
     }
 
-    res.status(400).send(error.errors);
+    return res.status(400).send(error.errors);
   }
 };
 
@@ -58,21 +66,6 @@ exports.store = async (req, res) => {
  * Edit a sauce
  */
 exports.update = async (req, res) => {
-  // //Find the sauce
-  // const sauce = await Sauce.findById(req.params.id).catch((error) =>
-  //   dbDebugger("Database error:", error)
-  // );
-  // //If sauce not found, return 404
-  // if (!sauce) {
-  //   return res.status(404).send("Sauce not found...");
-  // }
-  // //If all is well - update properties and return the updated sauce
-  // sauce.set({
-  //   ...req.body,
-  // });
-  // const result = await sauce.save();
-  // res.status(200).send(result);
-
   try {
     const sauce = await Sauce.findByIdAndUpdate(
       { _id: req.params.id },
@@ -85,12 +78,12 @@ exports.update = async (req, res) => {
     );
 
     if (!sauce) {
-      res.status(404).send("Sauce not found...");
+      return res.status(404).send({ error: "Sauce not found." });
     }
 
-    res.status(200).send(sauce);
+    return res.status(200).send(sauce);
   } catch (error) {
-    res.status(400).send(error.message);
+    return res.status(400).send(error.message);
   }
 };
 
@@ -102,11 +95,51 @@ exports.destroy = async (req, res) => {
     const sauce = await Sauce.findByIdAndDelete({ _id: req.params.id });
 
     if (!sauce) {
-      return res.status(404).send("Sauce not found.");
+      return res.status(404).send({ error: "Sauce not found." });
     }
 
-    res.send(`Sauce "${sauce.name}" deleted.`);
+    return res.send({ message: `Sauce ${sauce.name} deleted.` });
   } catch (error) {
-    res.status(400).send(error.message);
+    return res.status(400).send(error.message);
   }
+};
+
+/**
+ * Like or dislike a sauce
+ */
+exports.like = async (req, res) => {
+  const like = parseInt(req.body.like);
+  let sauce = await Sauce.findById(req.params.id).select({
+    usersLiked: 1,
+    usersDisliked: 1,
+  });
+  const hasLiked = sauce.usersLiked.indexOf(req.body.userId); //"63fb05579c38e415a111d560" //req.body.userId
+  const hasDisliked = sauce.usersDisliked.indexOf(req.body.userId);
+
+  if (like === 1 && hasLiked === -1 && hasDisliked === -1) {
+    try {
+      const sauce = await Sauce.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $inc: { likes: 1 }, $push: { usersLiked: req.body.userId } },
+        { new: true }
+      );
+      return res.status(200).send({ likes: sauce.likes });
+    } catch (error) {
+      return res.status(400).send(error.message);
+    }
+  } else if (like === -1 && hasDisliked === -1 && hasLiked === -1) {
+    try {
+      const sauce = await Sauce.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $inc: { dislikes: 1 }, $push: { usersDisliked: req.body.userId } },
+        { new: true }
+      );
+      return res.status(200).send({ dislikes: sauce.dislikes });
+    } catch (error) {
+      return res.status(400).send(error.message);
+    }
+  }
+  return res
+    .status(400)
+    .send({ error: "This user has already liked or disliked this sauce." });
 };

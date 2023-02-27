@@ -1,6 +1,6 @@
 const dbDebugger = require("debug")("app:db");
 
-const User = require("../models/User");
+const { User } = require("../models/User");
 
 /**
  * Get all users
@@ -9,9 +9,9 @@ exports.index = async (req, res) => {
   try {
     const users = await User.find().sort("email");
 
-    res.status(200).send(users);
+    return res.status(200).send(users);
   } catch (error) {
-    res.status(400).send(error.message);
+    return res.status(400).send(error.message);
   }
 };
 
@@ -26,7 +26,7 @@ exports.store = async (req, res) => {
   try {
     const result = await newUser.save();
 
-    res.status(200).send(result);
+    return res.status(200).send(result);
   } catch (error) {
     for (field in error.errors) {
       dbDebugger(error.errors[field].message);
@@ -35,10 +35,10 @@ exports.store = async (req, res) => {
     let errorMessage;
     error.code === 11000
       ? (errorMessage =
-          "Path '" + Object.keys(error.keyValue)[0] + "' already exists.")
+          "This '" + Object.keys(error.keyValue)[0] + "' already exists.")
       : (errorMessage = error.errors);
 
-    res.status(400).send({ error: errorMessage });
+    return res.status(400).send({ error: errorMessage });
   }
 };
 
@@ -46,5 +46,5 @@ exports.store = async (req, res) => {
  * Login user
  */
 exports.login = async (req, res) => {
-  res.status(200).send("Work in progress...");
+  return res.status(200).send({ message: "Work in progress" });
 };
