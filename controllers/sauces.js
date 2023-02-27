@@ -15,7 +15,7 @@ exports.index = async (req, res) => {
 
     return res.status(200).send(sauces);
   } catch (error) {
-    return res.status(400).send(error.message);
+    return res.status(400).send({ error: error.message });
   }
 };
 
