@@ -1,4 +1,5 @@
 const dbDebugger = require("debug")("app:db");
+const Joi = require("joi");
 
 const Sauce = require("../models/Sauce");
 const { User } = require("../models/User");
@@ -23,7 +24,13 @@ exports.index = async (req, res) => {
  */
 exports.show = async (req, res) => {
   try {
-    const sauce = await Sauce.findById(req.params.id);
+    const paramId = validateParamId(req.params);
+    if (paramId.error) {
+      return res.status(400).send({ error: paramId.error.details[0].message });
+    }
+    const sauceId = paramId.value.id;
+
+    const sauce = await Sauce.findById(sauceId);
     if (!sauce) {
       return res.status(404).send({ error: "Sauce not found." });
     }
@@ -40,7 +47,6 @@ exports.show = async (req, res) => {
 exports.store = async (req, res) => {
   try {
     const user = await User.findById(req.body.userId);
-
     if (!user) {
       return res
         .status(400)
@@ -58,7 +64,7 @@ exports.store = async (req, res) => {
       dbDebugger(error.errors[field].message);
     }
 
-    return res.status(400).send(error.errors);
+    return res.status(400).send({ error: error.message });
   }
 };
 
@@ -67,8 +73,14 @@ exports.store = async (req, res) => {
  */
 exports.update = async (req, res) => {
   try {
+    const paramId = validateParamId(req.params);
+    if (paramId.error) {
+      return res.status(400).send({ error: paramId.error.details[0].message });
+    }
+    const sauceId = paramId.value.id;
+
     const sauce = await Sauce.findByIdAndUpdate(
-      { _id: req.params.id },
+      { _id: sauceId },
       {
         $set: {
           ...req.body,
@@ -76,7 +88,6 @@ exports.update = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-
     if (!sauce) {
       return res.status(404).send({ error: "Sauce not found." });
     }
@@ -92,15 +103,20 @@ exports.update = async (req, res) => {
  */
 exports.destroy = async (req, res) => {
   try {
-    const sauce = await Sauce.findByIdAndDelete({ _id: req.params.id });
+    const paramId = validateParamId(req.params);
+    if (paramId.error) {
+      return res.status(400).send({ error: paramId.error.details[0].message });
+    }
+    const sauceId = paramId.value.id;
 
+    const sauce = await Sauce.findByIdAndDelete({ _id: sauceId });
     if (!sauce) {
       return res.status(404).send({ error: "Sauce not found." });
     }
 
     return res.send({ message: `Sauce ${sauce.name} deleted.` });
   } catch (error) {
-    return res.status(400).send(error.message);
+    return res.status(400).send({ error: error.message });
   }
 };
 
@@ -108,21 +124,51 @@ exports.destroy = async (req, res) => {
  * Like or dislike a sauce
  */
 exports.like = async (req, res) => {
-  const like = parseInt(req.body.like);
-  let sauce = await Sauce.findById(req.params.id).select({
+  //Validate request body and store its values separately
+  const reqBody = validateReqBody(req.body);
+  if (reqBody.error) {
+    return res.status(400).send({ error: reqBody.error.details[0].message });
+  }
+  const userId = reqBody.value.userId;
+  const like = reqBody.value.like;
+
+  //Check the user exists
+  const user = await User.findById(userId);
+  if (!user) {
+    return res
+      .status(400)
+      .send({ error: "No user suplied or no such user exists." });
+  }
+
+  //Check the param :id is valid and store its values separately
+  const paramId = validateParamId(req.params);
+  if (paramId.error) {
+    return res.status(400).send({ error: paramId.error.details[0].message });
+  }
+  const sauceId = paramId.value.id;
+
+  //Find the sauce to like/dislike and get relevant properties
+  let sauce = await Sauce.findById(sauceId).select({
     usersLiked: 1,
     usersDisliked: 1,
   });
-  const hasLiked = sauce.usersLiked.indexOf(req.body.userId); //"63fb05579c38e415a111d560" //req.body.userId
-  const hasDisliked = sauce.usersDisliked.indexOf(req.body.userId);
+  if (!sauce) {
+    return res.status(400).send({ error: "No such sauce exists." });
+  }
 
+  //Check if the user already liked or disliked the sauce in question
+  const hasLiked = sauce.usersLiked.indexOf(userId);
+  const hasDisliked = sauce.usersDisliked.indexOf(userId);
+
+  //Do what needs to be done
   if (like === 1 && hasLiked === -1 && hasDisliked === -1) {
     try {
       const sauce = await Sauce.findByIdAndUpdate(
-        { _id: req.params.id },
-        { $inc: { likes: 1 }, $push: { usersLiked: req.body.userId } },
+        { _id: sauceId },
+        { $inc: { likes: 1 }, $push: { usersLiked: userId } },
         { new: true }
       );
+
       return res.status(200).send({ likes: sauce.likes });
     } catch (error) {
       return res.status(400).send(error.message);
@@ -130,16 +176,54 @@ exports.like = async (req, res) => {
   } else if (like === -1 && hasDisliked === -1 && hasLiked === -1) {
     try {
       const sauce = await Sauce.findByIdAndUpdate(
-        { _id: req.params.id },
-        { $inc: { dislikes: 1 }, $push: { usersDisliked: req.body.userId } },
+        { _id: sauceId },
+        { $inc: { dislikes: 1 }, $push: { usersDisliked: userId } },
         { new: true }
       );
+
       return res.status(200).send({ dislikes: sauce.dislikes });
     } catch (error) {
       return res.status(400).send(error.message);
     }
+  } else if (like === 0) {
+    if (hasLiked !== -1) {
+      const sauce = await Sauce.findByIdAndUpdate(
+        { _id: sauceId },
+        { $inc: { likes: -1 }, $pull: { usersLiked: userId } },
+        { new: true }
+      );
+
+      return res.status(200).send({ likes: sauce.likes });
+    } else if (hasDisliked !== -1) {
+      const sauce = await Sauce.findByIdAndUpdate(
+        { _id: sauceId },
+        { $inc: { dislikes: -1 }, $pull: { usersDisliked: userId } },
+        { new: true }
+      );
+
+      return res.status(200).send({ dislikes: sauce.dislikes });
+    }
   }
-  return res
-    .status(400)
-    .send({ error: "This user has already liked or disliked this sauce." });
+
+  return res.status(200).send({
+    error:
+      "This user has already liked or disliked this sauce, or has cleared previous choice.",
+  });
 };
+
+//Body validation function
+function validateReqBody(req) {
+  const schema = Joi.object({
+    userId: Joi.string().hex().length(24).required(),
+    like: Joi.number().min(-1).max(1).required(),
+  });
+  return schema.validate(req);
+}
+
+//Param :id validation function
+function validateParamId(id) {
+  const schema = Joi.object({
+    id: Joi.string().hex().length(24).required(),
+  });
+  return schema.validate(id);
+}
