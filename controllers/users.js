@@ -1,5 +1,5 @@
 const dbDebugger = require("debug")("app:db");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const { User, validateUser } = require("../models/User");

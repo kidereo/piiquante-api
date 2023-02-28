@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const saltFactor = parseInt(process.env.SALT_WORK_FACTOR);
