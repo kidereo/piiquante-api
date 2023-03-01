@@ -2,34 +2,35 @@ const express = require("express");
 const router = express.Router();
 
 const saucesController = require("../controllers/sauces");
+const auth = require("../middleware/auth");
 
 /**
- * Get all sauces
+ * Get all sauces.
  */
 router.get("/", saucesController.index);
 
 /**
- * Get a sauce
+ * Get a sauce.
  */
 router.get("/:id", saucesController.show);
 
 /**
- * Add a sauce
+ * Add a sauce.
  */
-router.post("/", saucesController.store);
+router.post("/", auth, saucesController.store);
 
 /**
- * Edit a sauce
+ * Edit a sauce.
  */
 router.put("/:id", saucesController.update);
 
 /**
- * Delete a sauce
+ * Delete a sauce.
  */
 router.delete("/:id", saucesController.destroy);
 
 /**
- * Like or dislike a sauce
+ * Like or dislike a sauce.
  */
 router.post("/:id/like", saucesController.like);
 

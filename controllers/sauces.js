@@ -1,5 +1,6 @@
 const dbDebugger = require("debug")("app:db");
 const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 
 const Sauce = require("../models/Sauce");
 const { User } = require("../models/User");
@@ -46,7 +47,15 @@ exports.show = async (req, res) => {
  */
 exports.store = async (req, res) => {
   try {
-    const user = await User.findById(req.body.userId);
+    const currentUser = jwt.decode(req.header("x-auth-token"));
+    const currentUserId = currentUser._id;
+
+    const { error } = validateStoreReqBody(req.body);
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
+    }
+
+    const user = await User.findById(currentUserId);
     if (!user) {
       return res
         .status(400)
@@ -55,6 +64,7 @@ exports.store = async (req, res) => {
 
     const newSauce = new Sauce({
       ...req.body,
+      userId: currentUserId,
     });
     const result = await newSauce.save();
 
@@ -73,24 +83,39 @@ exports.store = async (req, res) => {
  */
 exports.update = async (req, res) => {
   try {
-    const paramId = validateParamId(req.params);
-    if (paramId.error) {
-      return res.status(400).send({ error: paramId.error.details[0].message });
+    const { error } = validateParamId(req.params);
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
     }
-    const sauceId = paramId.value.id;
 
-    const sauce = await Sauce.findByIdAndUpdate(
-      { _id: sauceId },
-      {
-        $set: {
-          ...req.body,
-        },
-      },
-      { new: true, runValidators: true }
-    );
+    const sauce = await Sauce.findById(req.params.id);
     if (!sauce) {
       return res.status(404).send({ error: "Sauce not found." });
     }
+
+    // const sauce = await Sauce.findByIdAndUpdate(
+    //   { _id: req.params.id },
+    //   {
+    //     $set: {
+    //       ...req.body,
+    //     },
+    //   },
+    //   { new: true, runValidators: true }
+    // );
+    // if (!sauce) {
+    //   return res.status(404).send({ error: "Sauce not found." });
+    // }
+
+    const currentUser = jwt.decode(req.header("x-auth-token"));
+    const currentUserId = currentUser._id;
+    if (sauce.userId !== currentUserId) {
+      return res
+        .status(401)
+        .send({ error: "Access denied. This user cannot delete this sauce." });
+    }
+
+    sauce.set({ ...req.body });
+    sauce.update();
 
     return res.status(200).send(sauce);
   } catch (error) {
@@ -103,18 +128,27 @@ exports.update = async (req, res) => {
  */
 exports.destroy = async (req, res) => {
   try {
-    const paramId = validateParamId(req.params);
-    if (paramId.error) {
-      return res.status(400).send({ error: paramId.error.details[0].message });
+    const { error } = validateParamId(req.params);
+    if (error) {
+      return res.status(400).send({ error: error.details[0].message });
     }
-    const sauceId = paramId.value.id;
 
-    const sauce = await Sauce.findByIdAndDelete({ _id: sauceId });
+    const sauce = await Sauce.findById(req.params.id);
     if (!sauce) {
       return res.status(404).send({ error: "Sauce not found." });
     }
 
-    return res.send({ message: `Sauce ${sauce.name} deleted.` });
+    const currentUser = jwt.decode(req.header("x-auth-token"));
+    const currentUserId = currentUser._id;
+    if (sauce.userId !== currentUserId) {
+      return res
+        .status(401)
+        .send({ error: "Access denied. This user cannot delete this sauce." });
+    }
+
+    sauce.delete();
+
+    return res.status(200).send({ message: `Sauce ${sauce.name} deleted.` });
   } catch (error) {
     return res.status(400).send({ error: error.message });
   }
@@ -125,7 +159,7 @@ exports.destroy = async (req, res) => {
  */
 exports.like = async (req, res) => {
   //Validate request body and store its values separately
-  const reqBody = validateReqBody(req.body);
+  const reqBody = validateLikeReqBody(req.body);
   if (reqBody.error) {
     return res.status(400).send({ error: reqBody.error.details[0].message });
   }
@@ -212,9 +246,21 @@ exports.like = async (req, res) => {
 };
 
 /**
- * Body validation function.
+ * Body validation functions.
  */
-function validateReqBody(req) {
+function validateStoreReqBody(req) {
+  const schema = Joi.object({
+    userId: Joi.string().hex().length(24),
+    heat: Joi.number().min(1).max(10).default(5),
+    name: Joi.string().min(5).max(50).required(),
+    manufacturer: Joi.string().min(5).max(50).required(),
+    description: Joi.string().min(5).max(255).required(),
+    mainPepper: Joi.string().min(3).max(50).required(),
+  });
+  return schema.validate(req);
+}
+
+function validateLikeReqBody(req) {
   const schema = Joi.object({
     userId: Joi.string().hex().length(24).required(),
     like: Joi.number().min(-1).max(1).required(),

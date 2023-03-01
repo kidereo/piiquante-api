@@ -5,6 +5,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const saltFactor = parseInt(process.env.SALT_WORK_FACTOR);
+const jwtKey = process.env.JWT_PRIVATE_KEY;
 
 const userSchema = mongoose.Schema({
   email: {
@@ -39,10 +40,7 @@ userSchema.pre("save", async function save(next) {
 });
 
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign(
-    { _id: this._id, email: this.email },
-    process.env.JWT_PRIVATE_KEY
-  );
+  const token = jwt.sign({ _id: this._id, email: this.email }, jwtKey);
   return token;
 };
 
