@@ -12,6 +12,7 @@ const dbDebugger = require("debug")("app:db");
 
 const auth = require("./middleware/auth");
 const homeRoute = require("./routes/home");
+const userRoutes = require("./routes/users");
 const sauceRoutes = require("./routes/sauces");
 const authRoutes = require("./routes/auth");
 
@@ -51,6 +52,7 @@ if (app.get("env") === "development") {
 }
 app.use(auth);
 app.use("/api", homeRoute);
+app.use("/api/users", userRoutes);
 app.use("/api/sauces", sauceRoutes);
 app.use("/api/auth", authRoutes);
 
