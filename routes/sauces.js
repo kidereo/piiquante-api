@@ -22,12 +22,12 @@ router.post("/", auth, saucesController.store);
 /**
  * Edit a sauce.
  */
-router.put("/:id", saucesController.update);
+router.put("/:id", auth, saucesController.update);
 
 /**
  * Delete a sauce.
  */
-router.delete("/:id", saucesController.destroy);
+router.delete("/:id", auth, saucesController.destroy);
 
 /**
  * Like or dislike a sauce.
