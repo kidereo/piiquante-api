@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const saltFactor = parseInt(process.env.SALT_WORK_FACTOR);
 
@@ -36,6 +37,14 @@ userSchema.pre("save", async function save(next) {
     return next(error);
   }
 });
+
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign(
+    { _id: this._id, email: this.email },
+    process.env.JWT_PRIVATE_KEY
+  );
+  return token;
+};
 
 const User = mongoose.model("User", userSchema);
 

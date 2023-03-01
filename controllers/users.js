@@ -1,6 +1,7 @@
 const dbDebugger = require("debug")("app:db");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const { User, validateUser } = require("../models/User");
 
@@ -28,7 +29,7 @@ exports.store = async (req, res) => {
   }
 
   //Check if this user already exists
-  const currentUser = await User.findOne({ email: req.body.email });
+  let currentUser = await User.findOne({ email: req.body.email });
   if (currentUser) {
     return res
       .status(400)
@@ -44,9 +45,13 @@ exports.store = async (req, res) => {
     //Password is now hashed in the User model on save.
     //const salt = await bcrypt.genSalt(parseInt(process.env.SALT_WORK_FACTOR));
     //newUser.password = await bcrypt.hash(newUser.password, salt);
-    const result = await newUser.save();
+    await newUser.save();
+    const token = newUser.generateAuthToken();
 
-    return res.status(200).send({ _id: result._id, email: result.email });
+    return res
+      .header("x-auth-token", token)
+      .status(200)
+      .send({ value: jwt.decode(token), token: token });
   } catch (error) {
     for (field in error.errors) {
       dbDebugger(error.errors[field].message);

@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models/User");
 
 /**
- * Login user
+ * Login user.
  */
 exports.login = async (req, res) => {
   //Validate request body
@@ -29,13 +29,17 @@ exports.login = async (req, res) => {
   }
 
   //Generate token
-  const token = jwt.sign(
-    { _id: user._id, email: user.email },
-    process.env.JWT_PRIVATE_KEY
-  );
-  return res.status(200).send({ message: token });
+  const token = user.generateAuthToken();
+
+  return res
+    .header("x-auth-token", token)
+    .status(200)
+    .send({ value: jwt.decode(token), token: token });
 };
 
+/**
+ * Validate request's body.
+ */
 function validateReqBody(req) {
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),

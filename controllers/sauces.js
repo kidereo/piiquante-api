@@ -5,7 +5,7 @@ const Sauce = require("../models/Sauce");
 const { User } = require("../models/User");
 
 /**
- * Get all sauces
+ * Get all sauces.
  */
 exports.index = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ exports.index = async (req, res) => {
 };
 
 /**
- * Get a sauce
+ * Get one sauce.
  */
 exports.show = async (req, res) => {
   try {
@@ -42,7 +42,7 @@ exports.show = async (req, res) => {
 };
 
 /**
- * Add a sauce
+ * Add a sauce.
  */
 exports.store = async (req, res) => {
   try {
@@ -69,7 +69,7 @@ exports.store = async (req, res) => {
 };
 
 /**
- * Edit a sauce
+ * Edit a sauce.
  */
 exports.update = async (req, res) => {
   try {
@@ -99,7 +99,7 @@ exports.update = async (req, res) => {
 };
 
 /**
- * Delete a sauce
+ * Delete a sauce.
  */
 exports.destroy = async (req, res) => {
   try {
@@ -121,7 +121,7 @@ exports.destroy = async (req, res) => {
 };
 
 /**
- * Like or dislike a sauce
+ * Like or dislike a sauce.
  */
 exports.like = async (req, res) => {
   //Validate request body and store its values separately
@@ -211,7 +211,9 @@ exports.like = async (req, res) => {
   });
 };
 
-//Body validation function
+/**
+ * Body validation function.
+ */
 function validateReqBody(req) {
   const schema = Joi.object({
     userId: Joi.string().hex().length(24).required(),
@@ -220,7 +222,9 @@ function validateReqBody(req) {
   return schema.validate(req);
 }
 
-//Param :id validation function
+/**
+ * Param :id validation function.
+ */
 function validateParamId(id) {
   const schema = Joi.object({
     id: Joi.string().hex().length(24).required(),
