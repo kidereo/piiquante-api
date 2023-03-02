@@ -5,9 +5,11 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const winston = require("winston");
+require("winston-mongodb");
 
 const startupDebugger = require("debug")("app:startup");
-const objectDebugger = require("debug")("app:objects");
+const exceptionsDebugger = require("debug")("app:exceptions");
 const dbDebugger = require("debug")("app:db");
 
 const auth = require("./middleware/auth");
@@ -17,19 +19,40 @@ const userRoutes = require("./routes/users");
 const sauceRoutes = require("./routes/sauces");
 const authRoutes = require("./routes/auth");
 
+const dbConnection =
+  "mongodb+srv://" +
+  process.env.DB_USER +
+  ":" +
+  process.env.DB_PASSWORD +
+  "@" +
+  process.env.DB_PATH +
+  "/" +
+  process.env.DB_NAME +
+  "?retryWrites=true&w=majority";
+
+//Handle uncaught exceptions and unhandled rejections outside Express
+process.on("uncaughtException", (exception) => {
+  exceptionsDebugger({ exception: exception });
+  winston.error(exception.message, exception);
+});
+
+process.on("unhandledRejection", (exception) => {
+  exceptionsDebugger({ exception: exception });
+  winston.error(exception.message, exception);
+});
+
+//Log errors to the database
+winston.add(
+  new winston.transports.MongoDB({
+    db: dbConnection,
+    level: "info",
+    options: { useUnifiedTopology: true },
+  })
+);
+
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(
-    "mongodb+srv://" +
-      process.env.DB_USER +
-      ":" +
-      process.env.DB_PASSWORD +
-      "@" +
-      process.env.DB_PATH +
-      "/" +
-      process.env.DB_NAME +
-      "?retryWrites=true&w=majority"
-  )
+  .connect(dbConnection)
   .then(() => dbDebugger("Database connection sucessfull..."))
   .catch((error) =>
     dbDebugger("Database connection failed with message:", error.message)
@@ -52,4 +75,4 @@ app.use("/api/auth", authRoutes);
 app.use(error);
 
 const port = config.get("port") || 3001;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+app.listen(port, () => startupDebugger(`Listening on port ${port}...`));
