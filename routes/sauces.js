@@ -32,6 +32,6 @@ router.delete("/:id", auth, saucesController.destroy);
 /**
  * Like or dislike a sauce.
  */
-router.post("/:id/like", saucesController.like);
+router.post("/:id/like", auth, saucesController.like);
 
 module.exports = router;

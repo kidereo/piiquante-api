@@ -106,8 +106,8 @@ exports.update = async (req, res) => {
     //   return res.status(404).send({ error: "Sauce not found." });
     // }
 
-    const currentUser = jwt.decode(req.header("x-auth-token"));
-    const currentUserId = currentUser._id;
+    //const currentUserId = jwt.decode(req.header("x-auth-token"))._id;
+    const currentUserId = req.user._id; //Auth middleware passes us the user id
     if (sauce.userId !== currentUserId) {
       return res
         .status(401)
@@ -159,12 +159,12 @@ exports.destroy = async (req, res) => {
  */
 exports.like = async (req, res) => {
   //Validate request body and store its values separately
-  const reqBody = validateLikeReqBody(req.body);
-  if (reqBody.error) {
-    return res.status(400).send({ error: reqBody.error.details[0].message });
+  const { error } = validateLikeReqBody(req.body);
+  if (error) {
+    return res.status(400).send({ error: error.details[0].message });
   }
-  const userId = reqBody.value.userId;
-  const like = reqBody.value.like;
+  const userId = req.user._id;
+  const like = req.body.like;
 
   //Check the user exists
   const user = await User.findById(userId);
@@ -262,7 +262,7 @@ function validateStoreReqBody(req) {
 
 function validateLikeReqBody(req) {
   const schema = Joi.object({
-    userId: Joi.string().hex().length(24).required(),
+    userId: Joi.string().hex().length(24),
     like: Joi.number().min(-1).max(1).required(),
   });
   return schema.validate(req);
