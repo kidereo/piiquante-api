@@ -11,6 +11,7 @@ const objectDebugger = require("debug")("app:objects");
 const dbDebugger = require("debug")("app:db");
 
 const auth = require("./middleware/auth");
+const error = require("./middleware/error");
 const homeRoute = require("./routes/home");
 const userRoutes = require("./routes/users");
 const sauceRoutes = require("./routes/sauces");
@@ -46,6 +47,9 @@ app.use("/api", homeRoute);
 app.use("/api/users", userRoutes);
 app.use("/api/sauces", sauceRoutes);
 app.use("/api/auth", authRoutes);
+
+//Error middleware must be last
+app.use(error);
 
 const port = config.get("port") || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

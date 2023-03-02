@@ -2,157 +2,117 @@ const dbDebugger = require("debug")("app:db");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 
+const asyncMiddleware = require("../middleware/async");
 const Sauce = require("../models/Sauce");
 const { User } = require("../models/User");
 
 /**
  * Get all sauces.
  */
-exports.index = async (req, res) => {
-  try {
-    const sauces = await Sauce.find().sort("name");
-    //.select({ name: 1, heat: 1, manufacturer: 1, description: 1 })
-    //.then((sauces) => res.status(200).json(sauces));
-
-    return res.status(200).send(sauces);
-  } catch (error) {
-    return res.status(400).send({ error: error.message });
-  }
-};
+exports.index = asyncMiddleware(async (req, res) => {
+  const sauces = await Sauce.find().sort("name");
+  return res.status(200).send(sauces);
+});
 
 /**
  * Get one sauce.
  */
-exports.show = async (req, res) => {
-  try {
-    const paramId = validateParamId(req.params);
-    if (paramId.error) {
-      return res.status(400).send({ error: paramId.error.details[0].message });
-    }
-    const sauceId = paramId.value.id;
-
-    const sauce = await Sauce.findById(sauceId);
-    if (!sauce) {
-      return res.status(404).send({ error: "Sauce not found." });
-    }
-
-    return res.status(200).send(sauce);
-  } catch (error) {
-    return res.status(400).send({ error: error.message });
+exports.show = asyncMiddleware(async (req, res) => {
+  const paramId = validateParamId(req.params);
+  if (paramId.error) {
+    return res.status(400).send({ error: paramId.error.details[0].message });
   }
-};
+  const sauceId = req.params.id;
+
+  const sauce = await Sauce.findById(sauceId);
+  if (!sauce) {
+    return res.status(404).send({ error: "Sauce not found." });
+  }
+
+  return res.status(200).send(sauce);
+});
 
 /**
  * Add a sauce.
  */
-exports.store = async (req, res) => {
-  try {
-    const currentUser = jwt.decode(req.header("x-auth-token"));
-    const currentUserId = currentUser._id;
+exports.store = asyncMiddleware(async (req, res) => {
+  const currentUser = jwt.decode(req.header("x-auth-token"));
+  const currentUserId = currentUser._id;
 
-    const { error } = validateStoreReqBody(req.body);
-    if (error) {
-      return res.status(400).send({ error: error.details[0].message });
-    }
-
-    const user = await User.findById(currentUserId);
-    if (!user) {
-      return res
-        .status(400)
-        .send({ error: "No user suplied or no such user exists." });
-    }
-
-    const newSauce = new Sauce({
-      ...req.body,
-      userId: currentUserId,
-    });
-    const result = await newSauce.save();
-
-    return res.status(200).send(result);
-  } catch (error) {
-    for (field in error.errors) {
-      dbDebugger(error.errors[field].message);
-    }
-
-    return res.status(400).send({ error: error.message });
+  const { error } = validateStoreReqBody(req.body);
+  if (error) {
+    return res.status(400).send({ error: error.details[0].message });
   }
-};
+
+  const user = await User.findById(currentUserId);
+  if (!user) {
+    return res
+      .status(400)
+      .send({ error: "No user suplied or no such user exists." });
+  }
+
+  const newSauce = new Sauce({
+    ...req.body,
+    userId: currentUserId,
+  });
+  const result = await newSauce.save();
+
+  return res.status(200).send(result);
+});
 
 /**
  * Edit a sauce.
  */
-exports.update = async (req, res) => {
-  try {
-    const { error } = validateParamId(req.params);
-    if (error) {
-      return res.status(400).send({ error: error.details[0].message });
-    }
-
-    const sauce = await Sauce.findById(req.params.id);
-    if (!sauce) {
-      return res.status(404).send({ error: "Sauce not found." });
-    }
-
-    // const sauce = await Sauce.findByIdAndUpdate(
-    //   { _id: req.params.id },
-    //   {
-    //     $set: {
-    //       ...req.body,
-    //     },
-    //   },
-    //   { new: true, runValidators: true }
-    // );
-    // if (!sauce) {
-    //   return res.status(404).send({ error: "Sauce not found." });
-    // }
-
-    //const currentUserId = jwt.decode(req.header("x-auth-token"))._id;
-    const currentUserId = req.user._id; //Auth middleware passes us the user id
-    if (sauce.userId !== currentUserId) {
-      return res
-        .status(401)
-        .send({ error: "Access denied. This user cannot delete this sauce." });
-    }
-
-    sauce.set({ ...req.body });
-    sauce.update();
-
-    return res.status(200).send(sauce);
-  } catch (error) {
-    return res.status(400).send(error.message);
+exports.update = asyncMiddleware(async (req, res) => {
+  const { error } = validateParamId(req.params);
+  if (error) {
+    return res.status(400).send({ error: error.details[0].message });
   }
-};
+
+  const sauce = await Sauce.findById(req.params.id);
+  if (!sauce) {
+    return res.status(404).send({ error: "Sauce not found." });
+  }
+  //const currentUserId = jwt.decode(req.header("x-auth-token"))._id;
+  const currentUserId = req.user._id; //Auth middleware passes us the user id
+  if (sauce.userId !== currentUserId) {
+    return res
+      .status(401)
+      .send({ error: "Access denied. This user cannot delete this sauce." });
+  }
+
+  sauce.set({ ...req.body });
+  sauce.update();
+
+  return res.status(200).send(sauce);
+});
 
 /**
  * Delete a sauce.
  */
-exports.destroy = async (req, res) => {
-  try {
-    const { error } = validateParamId(req.params);
-    if (error) {
-      return res.status(400).send({ error: error.details[0].message });
-    }
-
-    const sauce = await Sauce.findById(req.params.id);
-    if (!sauce) {
-      return res.status(404).send({ error: "Sauce not found." });
-    }
-
-    const currentUser = jwt.decode(req.header("x-auth-token"));
-    const currentUserId = currentUser._id;
-    if (sauce.userId !== currentUserId) {
-      return res
-        .status(401)
-        .send({ error: "Access denied. This user cannot delete this sauce." });
-    }
-
-    sauce.delete();
-
-    return res.status(200).send({ message: `Sauce ${sauce.name} deleted.` });
-  } catch (error) {
-    return res.status(400).send({ error: error.message });
+exports.destroy = asyncMiddleware(async (req, res) => {
+  const { error } = validateParamId(req.params);
+  if (error) {
+    return res.status(400).send({ error: error.details[0].message });
   }
-};
+
+  const sauce = await Sauce.findById(req.params.id);
+  if (!sauce) {
+    return res.status(404).send({ error: "Sauce not found." });
+  }
+
+  const currentUser = jwt.decode(req.header("x-auth-token"));
+  const currentUserId = currentUser._id;
+  if (sauce.userId !== currentUserId) {
+    return res
+      .status(401)
+      .send({ error: "Access denied. This user cannot delete this sauce." });
+  }
+
+  sauce.delete();
+
+  return res.status(200).send({ message: `Sauce ${sauce.name} deleted.` });
+});
 
 /**
  * Like or dislike a sauce.

@@ -4,24 +4,21 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const { User, validateUser } = require("../models/User");
+const asyncMiddleware = require("../middleware/async");
 
 /**
  * Get all users.
  */
-exports.index = async (req, res) => {
-  try {
-    const users = await User.find().sort("email");
+exports.index = asyncMiddleware(async (req, res) => {
+  const users = await User.find().sort("email");
 
-    return res.status(200).send(users);
-  } catch (error) {
-    return res.status(400).send({ error: error.message });
-  }
-};
+  return res.status(200).send(users);
+});
 
 /**
  * Get a currently authenticated user.
  */
-exports.show = async (req, res) => {
+exports.show = asyncMiddleware(async (req, res) => {
   const user = await User.findById(req.user._id).select({
     _id: 1,
     email: 1,
@@ -29,7 +26,7 @@ exports.show = async (req, res) => {
     dateAdded: 1,
   });
   return res.status(200).send(user);
-};
+});
 
 /**
  * Add a user
