@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const { User, validateUser } = require("../models/User");
 
 /**
- * Get all users
+ * Get all users.
  */
 exports.index = async (req, res) => {
   try {
@@ -16,6 +16,18 @@ exports.index = async (req, res) => {
   } catch (error) {
     return res.status(400).send({ error: error.message });
   }
+};
+
+/**
+ * Get a currently authenticated user.
+ */
+exports.show = async (req, res) => {
+  const user = await User.findById(req.user._id).select({
+    _id: 1,
+    email: 1,
+    dateAdded: 1,
+  });
+  return res.status(200).send(user);
 };
 
 /**

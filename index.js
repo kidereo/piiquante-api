@@ -50,7 +50,7 @@ if (app.get("env") === "development") {
   app.use(morgan("tiny"));
   startupDebugger("Morgan enabled...");
 }
-//app.use(auth);
+//app.use(auth); //Global auth application on all routes.
 app.use("/api", homeRoute);
 app.use("/api/users", userRoutes);
 app.use("/api/sauces", sauceRoutes);
