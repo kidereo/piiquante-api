@@ -34,18 +34,9 @@ mongoose
     dbDebugger("Database connection failed with message:", error.message)
   );
 
-/**
- * Start Test Ground
- */
-
-/**
- * End Test Ground
- */
-
 app.use(express.json());
 app.use(express.static("public"));
 app.use(helmet());
-//objectDebugger(helmet);
 if (app.get("env") === "development") {
   app.use(morgan("tiny"));
   startupDebugger("Morgan enabled...");

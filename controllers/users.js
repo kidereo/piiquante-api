@@ -25,6 +25,7 @@ exports.show = async (req, res) => {
   const user = await User.findById(req.user._id).select({
     _id: 1,
     email: 1,
+    isAdmin: 1,
     dateAdded: 1,
   });
   return res.status(200).send(user);
