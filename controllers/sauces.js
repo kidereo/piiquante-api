@@ -51,9 +51,16 @@ exports.store = asyncMiddleware(async (req, res) => {
       .send({ error: "No user suplied or no such user exists." });
   }
 
+  const url = req.protocol + "://" + req.get("host");
+  const placeholderUrl = url + "/public/images/placeholder.jpg";
+  const currentImageUrl = req.file
+    ? url + req.file.destination + req.file.filename
+    : placeholderUrl;
+
   const newSauce = new Sauce({
     ...req.body,
     userId: currentUserId,
+    imageUrl: currentImageUrl,
   });
   const result = await newSauce.save();
 
@@ -216,6 +223,7 @@ function validateStoreReqBody(req) {
     manufacturer: Joi.string().min(5).max(50).required(),
     description: Joi.string().min(5).max(255).required(),
     mainPepper: Joi.string().min(3).max(50).required(),
+    imageUrl: Joi.string(),
   });
   return schema.validate(req);
 }

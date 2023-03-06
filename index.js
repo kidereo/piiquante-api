@@ -50,6 +50,9 @@ winston.add(
   })
 );
 
+//Test log errors to the database
+//throw new Error("Test: Exception logging to the database");
+
 mongoose.set("strictQuery", false);
 mongoose
   .connect(dbConnection)
@@ -60,6 +63,7 @@ mongoose
 
 app.use(express.json());
 app.use(express.static("public"));
+app.use(express.static("public/images"));
 app.use(helmet());
 if (app.get("env") === "development") {
   app.use(morgan("tiny"));

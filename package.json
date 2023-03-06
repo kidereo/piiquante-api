@@ -1,13 +1,18 @@
 {
   "name": "piiquante-api",
   "version": "1.0.0",
-  "description": "Piiquante se dédie à la création de sauces épicées dont les recettes sont gardées secrètes. Pour tirer parti de son succès et générer davantage de buzz, l'entreprise souhaite créer une application web dans laquelle les utilisateurs peuvent ajouter leurs sauces préférées et liker ou disliker les sauces ajoutées par les autres.",
+  "description": "Backend API module for Project #06 - Build a Secure API for a Review App of the OpenClassrooms' Web Developer path.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "OpenClassrooms",
+    "Piiquante",
+    "Express",
+    "MongoDB"
+  ],
+  "author": "kidereo",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
@@ -20,6 +25,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.10.0",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "winston": "^3.8.2",
     "winston-mongodb": "^5.1.1"
   }

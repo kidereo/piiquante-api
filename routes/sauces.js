@@ -3,6 +3,7 @@ const router = express.Router();
 
 const saucesController = require("../controllers/sauces");
 const auth = require("../middleware/auth");
+const multer = require("../middleware/multer");
 
 /**
  * Get all sauces.
@@ -17,12 +18,12 @@ router.get("/:id", saucesController.show);
 /**
  * Add a sauce.
  */
-router.post("/", auth, saucesController.store);
+router.post("/", [auth, multer], saucesController.store);
 
 /**
  * Edit a sauce.
  */
-router.put("/:id", auth, saucesController.update);
+router.put("/:id", [auth, multer], saucesController.update);
 
 /**
  * Delete a sauce.
