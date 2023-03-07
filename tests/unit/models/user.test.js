@@ -5,9 +5,9 @@ const mongoose = require("mongoose");
 const { User, validateUser } = require("../../../models/User");
 const jwtKey = process.env.JWT_PRIVATE_KEY;
 
-describe("(UnitTesting): User functions", () => {
+describe("(UnitTesting): User Model Functions", () => {
   describe("user.validateUser", () => {
-    it("should validate user details", () => {
+    test("should validate user details", () => {
       const userDetails = {
         email: "test@test.com",
         password: "password",
@@ -19,7 +19,7 @@ describe("(UnitTesting): User functions", () => {
   });
 
   describe("user.generateAuthToken", () => {
-    it("should return a valid token", () => {
+    test("should return a valid token", () => {
       //const userDetails = { _id: "6406f84c8f4d08add4053b0f", isAdmin: true };
       const userDetails = {
         _id: mongoose.Types.ObjectId().toHexString(),

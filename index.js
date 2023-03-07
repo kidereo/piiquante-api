@@ -82,4 +82,8 @@ app.use("/api/auth", authRoutes);
 app.use(error);
 
 const port = config.get("port") || 3001;
-app.listen(port, () => startupDebugger(`Listening on port ${port}...`));
+const server = app.listen(port, () =>
+  startupDebugger(`Listening on port ${port}...`)
+);
+
+module.exports = server;
