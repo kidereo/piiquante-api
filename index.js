@@ -41,6 +41,9 @@ process.on("unhandledRejection", (exception) => {
   winston.error(exception.message, exception);
 });
 
+//Log errors to the local logfile
+winston.add(new winston.transports.File({ filename: "logfile.log" }));
+
 //Log errors to the database
 winston.add(
   new winston.transports.MongoDB({

@@ -1,5 +1,7 @@
 node_modules/
+coverage/
 .env
+logfile.log
 
 # macOS
 .DS_Store
