@@ -9,7 +9,7 @@ describe("(UnitTesting): User Model Functions", () => {
   describe("user.validateUser", () => {
     test("should validate user details", () => {
       const userDetails = {
-        email: "test@test.com",
+        email: "tester@test.dev",
         password: "password",
         isAdmin: true,
       };
@@ -23,7 +23,7 @@ describe("(UnitTesting): User Model Functions", () => {
       //const userDetails = { _id: "6406f84c8f4d08add4053b0f", isAdmin: true };
       const userDetails = {
         _id: mongoose.Types.ObjectId().toHexString(),
-        email: "test@test.com",
+        email: "tester@test.test",
         isAdmin: true,
       };
       const user = new User(userDetails);

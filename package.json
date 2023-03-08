@@ -4,7 +4,7 @@
   "description": "Backend API module for Project #06 - Build a Secure API for a Review App of the OpenClassrooms' Web Developer path.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll --verbose",
+    "test": "jest --watchAll --detectOpenHandles --verbose",
     "test:unit": "jest --testNamePattern=UnitTesting",
     "start": "node index.js",
     "start-dev": "DEBUG=app:* nodemon index.js"
