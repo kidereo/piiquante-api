@@ -206,7 +206,7 @@ exports.like = async (req, res) => {
     }
   }
 
-  return res.status(200).send({
+  return res.status(400).send({
     error:
       "This user has already liked or disliked this sauce, or has cleared previous choice.",
   });
