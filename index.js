@@ -44,16 +44,18 @@ process.on("unhandledRejection", (exception) => {
 //Log errors to the local logfile
 winston.add(new winston.transports.File({ filename: "logfile.log" }));
 
-//Log errors to the database
-winston.add(
-  new winston.transports.MongoDB({
-    db: dbConnection,
-    level: "info",
-    options: { useUnifiedTopology: true },
-  })
-);
+//Log errors to the database if not in test environment to avoid errors.
+if (app.get("env") !== "test") {
+  winston.add(
+    new winston.transports.MongoDB({
+      db: dbConnection,
+      level: "info",
+      options: { useUnifiedTopology: true },
+    })
+  );
+}
 
-//Test log errors to the database
+//Test log errors
 //throw new Error("Test: Exception logging to the database");
 
 mongoose.set("strictQuery", false);
