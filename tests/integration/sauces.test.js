@@ -33,7 +33,7 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
         manufacturer: "Test Manufacturer",
         description: "Hot Sauce to test the app.",
         mainPepper: "Jest",
-        heat: 10,
+        heat: 5,
         userId: user._id,
       });
       await testSauce.save();
@@ -71,6 +71,15 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
 
       //Expect the 404 error to be returned
       expect(res.status).toBe(404);
+    });
+
+    test("should return the 400 error if invalid id is supplied", async () => {
+      //Send a request to return a sauce with an invalid id
+      const invalidId = 1;
+      const res = await request(server).get(`/api/sauces/${invalidId}`);
+
+      //Expect the 404 error to be returned
+      expect(res.status).toBe(400);
     });
   });
 
@@ -153,6 +162,111 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
       expect(newSauce).not.toBeNull();
       expect(res.body).toHaveProperty("_id");
       expect(res.body).toHaveProperty("name", "Hot Test Sauce 2");
+    });
+  });
+
+  describe("PUT /api/sauces/:id", () => {
+    test("should return the 400 error if invalid id is supplied", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const invalidId = 1;
+
+      const res = await request(server)
+        .put(`/api/sauces/${invalidId}`)
+        .set("x-auth-token", token)
+        .send({ heat: 10 });
+
+      expect(res.status).toBe(400);
+    });
+
+    test("should return the 404 error if unknown id is supplied", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const unknownId = crypto.randomBytes(12).toString("hex");
+
+      const res = await request(server)
+        .put(`/api/sauces/${unknownId}`)
+        .set("x-auth-token", token)
+        .send({ heat: 10 });
+
+      expect(res.status).toBe(404);
+    });
+
+    test("should return the 401 error if user is not allowed to edit given sauce", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const sauce = await Sauce.findOne();
+
+      const res = await request(server)
+        .put(`/api/sauces/${sauce._id}`)
+        .set("x-auth-token", token)
+        .send({ heat: 10 });
+
+      expect(res.status).toBe(401);
+    });
+
+    test("should return the 200 status if user is allowed to edit given sauce", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const sauce = await Sauce.findOne({ userId: user._id });
+
+      const res = await request(server)
+        .put(`/api/sauces/${sauce._id}`)
+        .set("x-auth-token", token)
+        .send({ heat: 10 });
+
+      expect(res.status).toBe(200);
+      expect(res.body.heat).toBe(10);
+    });
+  });
+
+  describe("DELETE /api/sauces/:id", () => {
+    test("should return the 400 error if invalid id is supplied", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const invalidId = 1;
+
+      const res = await request(server)
+        .delete(`/api/sauces/${invalidId}`)
+        .set("x-auth-token", token);
+
+      expect(res.status).toBe(400);
+    });
+
+    test("should return the 404 error if unknown id is supplied", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const unknownId = crypto.randomBytes(12).toString("hex");
+
+      const res = await request(server)
+        .delete(`/api/sauces/${unknownId}`)
+        .set("x-auth-token", token);
+
+      expect(res.status).toBe(404);
+    });
+
+    test("should return the 401 error if user is not allowed to delete given sauce", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const sauce = await Sauce.findOne();
+
+      const res = await request(server)
+        .delete(`/api/sauces/${sauce._id}`)
+        .set("x-auth-token", token);
+
+      expect(res.status).toBe(401);
+    });
+
+    test("should return the 200 status if user is allowed to delete given sauce", async () => {
+      const user = await User.findOne();
+      const token = await user.generateAuthToken();
+      const sauce = await Sauce.findOne({ userId: user._id });
+
+      const res = await request(server)
+        .delete(`/api/sauces/${sauce._id}`)
+        .set("x-auth-token", token);
+
+      expect(res.status).toBe(200);
     });
   });
 });

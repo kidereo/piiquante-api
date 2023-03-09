@@ -1,10 +1,8 @@
 require("dotenv").config();
-const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
-const { User, validateUser } = require("../../../models/User");
+const { User } = require("../../../models/User");
 const auth = require("../../../middleware/auth");
-const jwtKey = process.env.JWT_PRIVATE_KEY;
 
 describe("auth middleware", () => {
   test("should populate req.user with a valid token payload", () => {
