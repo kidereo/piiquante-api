@@ -8,14 +8,14 @@ describe("(IntegrationTesting): Users Routes, Middleware & Controllers", () => {
   /*
    * Setup and teardown with cleanup.
    */
-  beforeAll(async () => {
+  beforeAll(() => {
     server = require("../../index");
   });
   afterAll(async () => {
     await User.findOneAndDelete({ email: "tester@test.com" });
     await User.findOneAndDelete({ email: "test_user@test.com" });
     await User.findOneAndDelete({ email: "test_user_2@test.com" });
-    server.close();
+    await server.close();
   });
 
   /*

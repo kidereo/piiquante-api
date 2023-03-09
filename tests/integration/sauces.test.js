@@ -11,14 +11,14 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
   /*
    * Setup and teardown with cleanup.
    */
-  beforeAll(async () => {
+  beforeAll(() => {
     randomUserId = crypto.randomBytes(12).toString("hex");
     server = require("../../index");
   });
   afterAll(async () => {
     await Sauce.findOneAndDelete({ name: "Hot Test Sauce" });
     await Sauce.findOneAndDelete({ name: "Hot Test Sauce 2" });
-    server.close();
+    await server.close();
   });
 
   /*

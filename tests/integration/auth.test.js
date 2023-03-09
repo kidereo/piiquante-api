@@ -15,7 +15,7 @@ describe("(IntegrationTesting): Auth Routes, Middleware & Controllers", () => {
   });
   afterAll(async () => {
     await Sauce.findOneAndDelete({ name: "Hot Test Sauce" });
-    server.close();
+    await server.close();
   });
 
   /*
