@@ -113,7 +113,6 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
           description: "Hot Sauce to test the app.",
           mainPepper: "Jest",
           heat: 5,
-          userId: randomUserId,
         });
 
       //Expect the 400 error
@@ -134,7 +133,25 @@ describe("(IntegrationTesting): Sauces Routes & Controllers", () => {
           description: "Hot Sauce to test the app.",
           mainPepper: "Jest",
           heat: 5,
-          userId: randomUserId,
+        });
+
+      //Expect the 400 error
+      expect(res.status).toBe(400);
+    });
+
+    test("should return the 400 error if the user does not exist", async () => {
+      const sauceName = new Array(10).join("a");
+      const token = new User().generateAuthToken();
+
+      const res = await request(server)
+        .post("/api/sauces")
+        .set("x-auth-token", token)
+        .send({
+          name: sauceName,
+          manufacturer: "Test Manufacturer",
+          description: "Hot Sauce to test the app.",
+          mainPepper: "Jest",
+          heat: 5,
         });
 
       //Expect the 400 error

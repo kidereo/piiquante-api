@@ -63,9 +63,9 @@ exports.store = async (req, res) => {
       .status(200)
       .send({ value: jwt.decode(token), token: token });
   } catch (error) {
-    for (field in error.errors) {
-      dbDebugger(error.errors[field].message);
-    }
+    // for (field in error.errors) {
+    //   dbDebugger(error.errors[field].message);
+    // }
     //Check if the error is due to duplicates in the database.
     let errorMessage;
     error.code === 11000
