@@ -1,6 +1,6 @@
 const error = require("../../../middleware/error");
 
-describe("error middleware ", () => {
+describe("(UnitTesting): Error middleware", () => {
   test("should return the 500 status, an error message and abort without calling next()", () => {
     const err = {
       message: "Fatal error",

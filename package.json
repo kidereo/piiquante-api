@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles --verbose --coverage --forceExit",
-    "test:unit": "jest --testNamePattern=UnitTesting",
+    "test:unit": "jest --testNamePattern=UnitTesting --detectOpenHandles --verbose --coverage --forceExit",
+    "test:integration": "jest --testNamePattern=IntegrationTesting --detectOpenHandles --verbose --coverage --forceExit",
     "start": "node index.js",
     "start-dev": "DEBUG=app:* nodemon index.js"
   },

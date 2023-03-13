@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { User } = require("../../../models/User");
 const auth = require("../../../middleware/auth");
 
-describe("auth middleware", () => {
+describe("(UnitTesting): Auth middleware", () => {
   test("should populate req.user with a valid token payload", () => {
     const user = {
       _id: mongoose.Types.ObjectId().toHexString(),
